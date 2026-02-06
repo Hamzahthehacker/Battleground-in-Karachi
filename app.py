@@ -3,138 +3,92 @@ import random
 import time
 from streamlit_autorefresh import st_autorefresh
 
-# 1. Page Config - Responsive settings
-st.set_page_config(page_title="Nokia 3310 Karachi", layout="centered", initial_sidebar_state="collapsed")
+# Page Config
+st.set_page_config(page_title="Nokia Snake: Hamza Edition", page_icon="🐍")
 
-# 2. Advanced CSS for Fixed Screen & Nokia Body
+# Custom CSS for Nokia 3310 Vibes
 st.markdown("""
     <style>
-    /* Hide Streamlit default elements */
-    #MainMenu, footer, header {visibility: hidden;}
-    .main { background-color: #111; overflow: hidden; height: 100vh; }
-    
-    /* Phone Frame - Optimized for iPhone 6s Aspect Ratio */
-    .nokia-body {
-        background-color: #3b5998;
-        border-radius: 30px;
-        border: 5px solid #222;
-        width: 300px;
-        height: 520px;
-        margin: auto;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding-top: 20px;
-        box-shadow: 0px 10px 30px rgba(0,0,0,0.8);
+    .main { background-color: #8fb31d; color: #000; font-family: 'Courier New', Courier, monospace; }
+    .game-board { 
+        border: 10px solid #222; 
+        background-color: #97ba1e; 
+        line-height: 1; 
+        font-size: 20px;
+        padding: 10px;
+        display: inline-block;
     }
-    
-    /* Green Game Screen */
-    .screen-area {
-        background-color: #97ba1e;
-        width: 260px;
-        height: 180px;
-        border: 8px solid #111;
-        font-family: 'Courier New', monospace;
-        color: #222;
-        padding: 5px;
-        font-weight: bold;
-        font-size: 16px;
-        line-height: 1;
-        overflow: hidden;
-    }
-    
-    /* Keypad Area */
-    .keypad {
-        margin-top: 20px;
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-    
-    /* Invisible but clickable buttons for joystick */
-    .stButton>button {
-        background-color: #444 !important;
-        color: white !important;
-        border-radius: 50% !important;
-        width: 45px !important;
-        height: 45px !important;
-        padding: 0px !important;
-        font-size: 18px !important;
-    }
+    .stButton>button { background-color: #222; color: #97ba1e; border: none; font-weight: bold; width: 100%; }
     </style>
     """, unsafe_allow_html=True)
 
-# 3. Game Loop (Faster for Action)
-st_autorefresh(interval=350, key="nokia_engine")
+# Game Constants
+WIDTH, HEIGHT = 20, 10
 
-# 4. State Management
+# Initialize Game State
 if 'snake' not in st.session_state:
-    st.session_state.snake = [(5, 5), (5, 4)]
-    st.session_state.dir = "RIGHT"
-    st.session_state.food = (3, 3)
+    st.session_state.snake = [(5, 5), (5, 4), (5, 3)]
+    st.session_state.direction = "RIGHT"
+    st.session_state.food = (random.randint(0, HEIGHT-1), random.randint(0, WIDTH-1))
     st.session_state.score = 0
-    st.session_state.over = False
+    st.session_state.game_over = False
 
-# 5. Logic
-if not st.session_state.over:
-    y, x = st.session_state.snake[0]
-    if st.session_state.dir == "UP": y -= 1
-    elif st.session_state.dir == "DOWN": y += 1
-    elif st.session_state.dir == "LEFT": x -= 1
-    elif st.session_state.dir == "RIGHT": x += 1
+# Auto-refresh for movement (Simulating FPS)
+st_autorefresh(interval=500, key="gameloop")
+
+st.title("🐍 Nokia Snake: Karachi 3.7")
+st.write(f"**Player:** Sultan Muhammad Hamza Hameed | **Score:** {st.session_state.score}")
+
+# Controls
+col1, col2, col3 = st.columns(3)
+with col2:
+    if st.button("UP"): st.session_state.direction = "UP"
+with col1:
+    if st.button("LEFT"): st.session_state.direction = "LEFT"
+with col3:
+    if st.button("RIGHT"): st.session_state.direction = "RIGHT"
+with col2:
+    if st.button("DOWN"): st.session_state.direction = "DOWN"
+
+# Game Logic
+if not st.session_state.game_over:
+    head_y, head_x = st.session_state.snake[0]
     
-    new_head = (y, x)
-    if x<0 or x>=16 or y<0 or y>=10 or new_head in st.session_state.snake:
-        st.session_state.over = True
+    if st.session_state.direction == "UP": head_y -= 1
+    elif st.session_state.direction == "DOWN": head_y += 1
+    elif st.session_state.direction == "LEFT": head_x -= 1
+    elif st.session_state.direction == "RIGHT": head_x += 1
+    
+    new_head = (head_y, head_x)
+    
+    # Check Collisions
+    if (new_head in st.session_state.snake or 
+        head_x < 0 or head_x >= WIDTH or 
+        head_y < 0 or head_y >= HEIGHT):
+        st.session_state.game_over = True
     else:
         st.session_state.snake.insert(0, new_head)
         if new_head == st.session_state.food:
             st.session_state.score += 10
-            st.session_state.food = (random.randint(0, 9), random.randint(0, 15))
+            st.session_state.food = (random.randint(0, HEIGHT-1), random.randint(0, WIDTH-1))
         else:
             st.session_state.snake.pop()
 
-# --- 6. RENDER NOKIA ---
-st.markdown('<div class="nokia-body">', unsafe_allow_html=True)
-
-# Speaker & Logo
-st.markdown("<div style='color:#ccc; font-size:10px;'>NOKIA</div>", unsafe_allow_html=True)
-
-# The Screen
-st.markdown('<div class="screen-area">', unsafe_allow_html=True)
-board = [["·" for _ in range(16)] for _ in range(10)]
+# Render Board
+board = [["░" for _ in range(WIDTH)] for _ in range(HEIGHT)]
 fy, fx = st.session_state.food
-board[fy][fx] = "■"
-for sy, sx in st.session_state.snake:
-    board[sy][sx] = "▓"
+board[fy][fx] = "🍎"
 
-display_str = "\n".join(["".join(row) for row in board])
-st.text(display_str)
-st.write(f"SCORE: {st.session_state.score}")
-st.markdown('</div>', unsafe_allow_html=True)
+for i, (y, x) in enumerate(st.session_state.snake):
+    board[y][x] = "█" if i == 0 else "▓"
 
-# Virtual Keypad
-st.write("")
-_, c2, _ = st.columns([1,1,1])
-with c2: st.button("▲", on_click=lambda: setattr(st.session_state, 'dir', 'UP'))
+game_str = "\n".join(["".join(row) for row in board])
+st.markdown(f"<div class='game-board'><pre>{game_str}</pre></div>", unsafe_allow_html=True)
 
-c1, c2, c3 = st.columns([1,1,1])
-with c1: st.button("◀", on_click=lambda: setattr(st.session_state, 'dir', 'LEFT'))
-with c2: st.write("🎮")
-with c3: st.button("▶", on_click=lambda: setattr(st.session_state, 'dir', 'RIGHT'))
-
-_, c2, _ = st.columns([1,1,1])
-with c2: st.button("▼", on_click=lambda: setattr(st.session_state, 'dir', 'DOWN'))
-
-st.markdown('</div>', unsafe_allow_html=True)
-
-if st.session_state.over:
-    st.error("GAME OVER!")
-    if st.button("RETRY"):
-        st.session_state.snake = [(5, 5), (5, 4)]
-        st.session_state.over = False
+if st.session_state.game_over:
+    st.error("💥 CRASHED! GAME OVER")
+    if st.button("Restart Game"):
+        st.session_state.snake = [(5, 5), (5, 4), (5, 3)]
         st.session_state.score = 0
+        st.session_state.game_over = False
         st.rerun()
-
-st.caption("Sultan Muhammad Hamza Hameed Edition")
