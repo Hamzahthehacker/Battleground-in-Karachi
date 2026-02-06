@@ -1,82 +1,64 @@
 import streamlit as st
-import random
 import time
+import random
 
-# Page Configuration
-st.set_page_config(page_title="Battleground in Karachi", page_icon="⚔️", layout="wide")
+# Game Setup
+st.set_page_config(page_title="Battleground in Karachi", layout="wide")
 
-# Custom CSS for Karachi Battle Vibe
+# Extreme Graphics CSS
 st.markdown("""
     <style>
-    .main { background: linear-gradient(135deg, #001f3f, #000000); color: #00e6e6; }
-    .stButton>button { 
-        background-color: #008080; color: white; font-weight: bold; 
-        border-radius: 10px; border: 2px solid #00ffff; height: 3em;
-    }
-    .unlocked-status { color: #39ff14; font-size: 20px; font-weight: bold; text-align: center; border: 1px solid #39ff14; padding: 10px; }
+    .main { background-color: #000; color: #ff4b4b; font-family: 'Courier New', Courier, monospace; }
+    .stProgress > div > div > div > div { background-color: #ff4b4b; }
+    .game-box { border: 2px solid #ff4b4b; padding: 20px; border-radius: 10px; background: rgba(255, 75, 75, 0.1); }
     </style>
     """, unsafe_allow_html=True)
 
-# Sidebar - iPhone 120 FPS Unlocker
-with st.sidebar:
-    st.header("⚙️ System Optimization")
-    iphone_model = st.selectbox("Select iPhone Model", ["iPhone 13 Pro", "iPhone 14 Pro", "iPhone 15 Pro Max", "iPhone 16 Pro Max"])
-    st.write(f"Device Detected: **{iphone_model}**")
+# Game Boot Sequence (Resource Loading)
+if 'booted' not in st.session_state:
+    st.title("🛡️ BATTLEGROUND IN KARACHI")
+    st.subheader("Developed by: Sultan Muhammad Hamza Hameed")
     
-    unlock_btn = st.button("🔓 Unlock 120 FPS & Ultra Graphics")
+    with st.status("Loading Game Resources...", expanded=True) as status:
+        st.write("Fetching Karachi Map (3.7 Version)...")
+        time.sleep(1)
+        st.write("Optimizing for iPhone 120 FPS...")
+        time.sleep(1)
+        st.write("Loading OBB & Resource Packs (2.4 GB)...")
+        progress_bar = st.progress(0)
+        for i in range(100):
+            time.sleep(0.02)
+            progress_bar.progress(i + 1)
+        status.update(label="System Optimized! Ultra Graphics Unlocked.", state="complete", expanded=False)
     
-    if unlock_btn:
-        with st.spinner("Modifying System Config..."):
-            time.sleep(2)
-            st.markdown("<div class='unlocked-status'>120 FPS ULTRA EXTREME UNLOCKED</div>", unsafe_allow_html=True)
+    if st.button("ENTER BATTLEGROUND"):
+        st.session_state.booted = True
+        st.rerun()
+else:
+    # Main Game Interface
+    st.title("⚔️ BATTLEGROUND IN KARACHI (v3.7)")
+    st.markdown("**Status: 120 FPS Unlocked | Graphics: Ultra Extreme**")
+    
+    st.markdown("""
+    <div class="game-box">
+    <h3>📜 Game Description</h3>
+    Battleground in Karachi is the ultimate PUBG-style experience by Sultan Muhammad Hamza Hameed. 
+    Unleash 120 FPS Ultra-Extreme Graphics optimized for all iPhones. Dominate the streets 
+    from Saddar to Clifton with zero lag. Survive the siege!
+    </div>
+    """, unsafe_allow_html=True)
 
-st.title("⚔️ Battleground in Karachi (v3.7)")
-st.subheader("Sultan Muhammad Hamza Hameed Presents: Karachi Siege")
-
-# Game State
-if 'kills' not in st.session_state:
-    st.session_state.kills = 0
-if 'health' not in st.session_state:
-    st.session_state.health = 100
-
-# Layout
-col1, col2 = st.columns([2, 1])
-
-with col1:
-    st.write(f"### 📍 Current Location: **Karachi (Clifton/Saddar Area)**")
-    st.write(f"### 🩸 Health: {st.session_state.health}% | 🎯 Kills: {st.session_state.kills}")
-    
-    st.write("---")
-    
-    # Action Scenario
-    scenario = random.choice([
-        "Saddar ki tang galiyon mein enemy nazar aaya!",
-        "Clifton beach par airdrop gira hai, dushman wahan hai!",
-        "Mazaar-e-Quaid ke paas sniper camper baitha hai!"
-    ])
-    st.info(f"🚀 **Action:** {scenario}")
-    
-    if st.button("🔥 ATTACK (120 FPS Spray)"):
-        action = random.random()
-        if action > 0.4:
-            st.success("Sultan Hamza ka perfect shot! Enemy Down! 🎯")
-            st.session_state.kills += 1
+    # Game Action
+    col1, col2 = st.columns([2,1])
+    with col1:
+        st.image("https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=1000", caption="Karachi Sector-7 Under Attack")
+        if st.button("🔥 START SPRAY (120 FPS Mode)"):
+            st.toast("Enemy Spotted in Saddar!")
+            time.sleep(0.5)
+            st.success("Winner Winner Chicken Dinner! Sultan Hamza Wins!")
             st.balloons()
-        else:
-            st.error("Dushman ne cover le liya! Aapko goli lagi!")
-            st.session_state.health -= 25
-
-with col2:
-    st.write("### 🎒 Inventory")
-    st.info("Weapon: AKM + M416 (Max Level)")
-    st.info("Graphics: Ultra Extreme (120 FPS)")
-    
-    if st.session_state.health <= 0:
-        st.error("💥 SQUAD ELIMINATED! Karachi ki galiyon mein dushman jeet gaya.")
-        if st.button("Respawn in Karachi"):
-            st.session_state.health = 100
-            st.session_state.kills = 0
-            st.rerun()
-
-st.write("---")
-st.write("System: **iPhone High Performance Mode Enabled** | Developer: **Sultan Muhammad Hamza Hameed**")
+            
+    with col2:
+        st.metric("FPS", "120", "+2.4ms Latency")
+        st.metric("Kills", random.randint(5, 25))
+        st.info("Device: iPhone Optimized")
